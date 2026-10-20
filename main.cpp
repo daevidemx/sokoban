@@ -34,41 +34,41 @@ int main() {
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 1},
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1},
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
     };
 
     while (WindowShouldClose() == false) {
 
         if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) {
-            if (level[player.posY][player.posX + 1] == 0) {
+            if (level[player.posY][player.posX + 1] == 0 || level[player.posY][player.posX + 1] == 3) {
                 player.posX += 1;
-            } else if (level[player.posY][player.posX + 1] == 2 && level[player.posY][player.posX + 2] == 0) {
+            } else if (level[player.posY][player.posX + 1] == 2 && (level[player.posY][player.posX + 2] == 0 || level[player.posY][player.posX + 2] == 3)) {
                 player.posX += 1;
                 level[player.posY][player.posX] = 0;
                 level[player.posY][player.posX + 1] = 2;
             }
         } else if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) {
-            if (level[player.posY][player.posX - 1] == 0) {
+            if (level[player.posY][player.posX - 1] == 0 || level[player.posY][player.posX - 1] == 3) {
                 player.posX -= 1;
-            } else if (level[player.posY][player.posX - 1] == 2 && level[player.posY][player.posX - 2] == 0) {
+            } else if (level[player.posY][player.posX - 1] == 2 && (level[player.posY][player.posX - 2] == 0 || level[player.posY][player.posX - 2] == 3)) {
                 player.posX -= 1;
                 level[player.posY][player.posX] = 0;
                 level[player.posY][player.posX - 1] = 2;
             }
         } else if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN)) {
-            if (level[player.posY + 1][player.posX] == 0) {
+            if (level[player.posY + 1][player.posX] == 0 || level[player.posY + 1][player.posX] == 3) {
                 player.posY += 1;
-            } else if (level[player.posY + 1][player.posX] == 2 && level[player.posY + 2][player.posX] == 0) {
+            } else if (level[player.posY + 1][player.posX] == 2 && (level[player.posY + 2][player.posX] == 0 || level[player.posY + 2][player.posX] == 3)) {
                 player.posY += 1;
                 level[player.posY][player.posX] = 0;
                 level[player.posY + 1][player.posX] = 2;
             }
         } else if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) {
-            if (level[player.posY - 1][player.posX] == 0) {
+            if (level[player.posY - 1][player.posX] == 0 || level[player.posY - 1][player.posX] == 3) {
                 player.posY -= 1;
-            } else if (level[player.posY - 1][player.posX] == 2 && level[player.posY - 2][player.posX] == 0) {
+            } else if (level[player.posY - 1][player.posX] == 2 && (level[player.posY - 2][player.posX] == 0 || level[player.posY - 2][player.posX] == 3)) {
                 player.posY -= 1;
                 level[player.posY][player.posX] = 0;
                 level[player.posY - 1][player.posX] = 2;
