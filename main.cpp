@@ -17,6 +17,7 @@ int main() {
     Texture2D grassTex = LoadTexture("images/sprite_grass.png");
     Texture2D playerTex = LoadTexture("images/sprite_player.png");
     Texture2D boxTex = LoadTexture("images/sprite_box.png");
+    Texture2D winTex = LoadTexture("images/sprite_win.png");
 
     int tileSize = brickTex.width;
     int level[16][16] = {
@@ -34,7 +35,7 @@ int main() {
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1},
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
     };
 
@@ -83,6 +84,8 @@ int main() {
                     DrawTexture(brickTex, j * tileSize, i * tileSize, WHITE);
                 } else if (level[i][j] == 2) {
                     DrawTexture(boxTex, j * tileSize, i * tileSize, WHITE);
+                } else if (level[i][j] == 3) {
+                    DrawTexture(winTex, j * tileSize, i * tileSize, WHITE);
                 } else {
                     DrawTexture(grassTex, j * tileSize, i * tileSize, WHITE);
                 }
