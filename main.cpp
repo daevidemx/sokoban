@@ -8,7 +8,7 @@ struct Player {
 
 int main() {
 
-    Player player = {1, 1};
+    Player player = {5, 9};
 
     InitWindow(768, 768, "Sokoban");
     SetTargetFPS(60);
@@ -24,23 +24,24 @@ int main() {
 
     int tileSize = brickTex.width;
     int level[16][16] = {
-        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+        {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+        {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+        {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+        {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+        {5, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5},
+        {5, 5, 5, 5, 1, 1, 0, 0, 2, 3, 0, 1, 5, 5, 5, 5},
+        {5, 5, 5, 5, 1, 3, 3, 0, 0, 0, 0, 1, 5, 5, 5, 5},
+        {5, 5, 5, 5, 1, 0, 0, 2, 0, 1, 1, 1, 5, 5, 5, 5},
+        {5, 5, 5, 5, 1, 1, 1, 1, 2, 0, 0, 1, 5, 5, 5, 5},
+        {5, 5, 5, 5, 1, 0, 0, 0, 0, 0, 0, 1, 5, 5, 5, 5},
+        {5, 5, 5, 5, 1, 0, 0, 0, 1, 0, 0, 1, 5, 5, 5, 5},
+        {5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5},
+        {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+        {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+        {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+        {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
     };
+    bool levelWin = true;
 
     while (WindowShouldClose() == false) {
 
@@ -51,7 +52,11 @@ int main() {
                 if (level[player.posY][player.posX + 1] == 4) {
                     player.posX += 1;
                     level[player.posY][player.posX] = 3;
-                    level[player.posY][player.posX + 1] = 2;
+                    if (level[player.posY][player.posX + 1] == 3) {
+                        level[player.posY][player.posX + 1] = 4;
+                    } else {
+                        level[player.posY][player.posX + 1] = 2;
+                    }
                 } else {
                     player.posX += 1;
                     level[player.posY][player.posX] = 0;
@@ -69,7 +74,11 @@ int main() {
                 if (level[player.posY][player.posX - 1] == 4) {
                     player.posX -= 1;
                     level[player.posY][player.posX] = 3;
-                    level[player.posY][player.posX - 1] = 2;
+                    if (level[player.posY][player.posX - 1] == 3) {
+                        level[player.posY][player.posX - 1] = 4;
+                    } else {
+                        level[player.posY][player.posX - 1] = 2;
+                    }
                 } else {
                     player.posX -= 1;
                     level[player.posY][player.posX] = 0;
@@ -87,7 +96,11 @@ int main() {
                 if (level[player.posY + 1][player.posX] == 4) {
                     player.posY += 1;
                     level[player.posY][player.posX] = 3;
-                    level[player.posY + 1][player.posX] = 2;
+                    if (level[player.posY + 1][player.posX] == 3) {
+                        level[player.posY + 1][player.posX] = 4;
+                    } else {
+                        level[player.posY + 1][player.posX] = 2;
+                    }
                 } else {
                     player.posY += 1;
                     level[player.posY][player.posX] = 0;
@@ -105,7 +118,11 @@ int main() {
                 if (level[player.posY - 1][player.posX] == 4) {
                     player.posY -= 1;
                     level[player.posY][player.posX] = 3;
-                    level[player.posY - 1][player.posX] = 2;
+                    if (level[player.posY - 1][player.posX] == 3) {
+                        level[player.posY - 1][player.posX] = 4;
+                    } else {
+                        level[player.posY - 1][player.posX] = 2;
+                    }
                 } else {
                     player.posY -= 1;
                     level[player.posY][player.posX] = 0;
@@ -118,8 +135,20 @@ int main() {
             }
         }
 
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 16; j++) {
+                if (level[i][j] == 3) {
+                    levelWin = false;
+                }
+            }
+        }
+
         BeginDrawing();
         ClearBackground(BLACK);
+
+        if (levelWin) {
+            DrawText("YOU WON!", 350, 350, 40, GOLD);
+        }
 
         for (int i = 0; i < 16; i++) {
             for (int j = 0; j < 16; j++) {
@@ -131,8 +160,10 @@ int main() {
                     DrawTexture(winTex, j * tileSize, i * tileSize, WHITE);
                 } else if (level[i][j] == 4) {
                     DrawTexture(winBox, j * tileSize, i * tileSize, WHITE);
-                } else {
+                } else if (level[i][j] == 0) {
                     DrawTexture(grassTex, j * tileSize, i * tileSize, WHITE);
+                } else {
+                    //Prints black.
                 }
             }
         }
