@@ -76,14 +76,14 @@ int lvl5[16][16] = {
 struct Player {
     int posX;
     int posY;
+    float drawX;
+    float drawY;
 };
 
 void controlMechanics(Player &pl, int lvl[16][16]);
-void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16]);
+void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize);
 
 int main() {
-
-    Player pl = {5, 9};
 
     InitWindow(768, 768, "Sokoban");
     SetTargetFPS(60);
@@ -98,14 +98,15 @@ int main() {
     Texture2D winBox = LoadTexture("images/sprite_winbox.png");
 
     int tileSize = brickTex.width;
+    Player pl = {5, 9, 5.0f * tileSize, 9.0f * tileSize};
     int lvl[16][16] = {
         {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
         {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
         {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
         {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
         {5, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5},
-        {5, 5, 5, 5, 1, 1, 0, 0, 2, 0, 0, 1, 5, 5, 5, 5},
-        {5, 5, 5, 5, 1, 3, 0, 0, 0, 0, 0, 1, 5, 5, 5, 5},
+        {5, 5, 5, 5, 1, 1, 0, 0, 2, 3, 0, 1, 5, 5, 5, 5},
+        {5, 5, 5, 5, 1, 3, 3, 0, 0, 0, 0, 1, 5, 5, 5, 5},
         {5, 5, 5, 5, 1, 0, 0, 2, 0, 1, 1, 1, 5, 5, 5, 5},
         {5, 5, 5, 5, 1, 1, 1, 1, 2, 0, 0, 1, 5, 5, 5, 5},
         {5, 5, 5, 5, 1, 0, 0, 0, 0, 0, 0, 1, 5, 5, 5, 5},
@@ -121,7 +122,7 @@ int main() {
     while (WindowShouldClose() == false) {
 
         bool lvlWin = true;
-        /*
+
         for (int i = 0; i < 16; i++) {
             for (int j = 0; j < 16; j++) {
                 if (lvl[i][j] == 3) {
@@ -129,25 +130,22 @@ int main() {
                 }
             }
         }
-        */
-        if (IsKeyPressed(KEY_P)) {
-            lvlWin = true;
-        }
+
         if (lvlWin) {
             if (IsKeyPressed(KEY_ENTER)) {
                 currentLevel++;
                 switch (currentLevel) {
                     case 2:
-                        changeLevel(pl, 5, 10, lvl, lvl2);
+                        changeLevel(pl, 5, 10, lvl, lvl2, tileSize);
                         break;
                     case 3:
-                        changeLevel(pl, 7, 10, lvl, lvl3);
+                        changeLevel(pl, 7, 10, lvl, lvl3, tileSize);
                         break;
                     case 4:
-                        changeLevel(pl, 4, 8, lvl, lvl4);
+                        changeLevel(pl, 4, 8, lvl, lvl4, tileSize);
                         break;
                     case 5:
-                        changeLevel(pl, 5, 10, lvl, lvl5);
+                        changeLevel(pl, 5, 10, lvl, lvl5, tileSize);
                         break;
                     default:
                         break;
@@ -156,6 +154,10 @@ int main() {
         } else {
             controlMechanics(pl, lvl);
         }
+
+        float slideSpeed = 20.0f;
+        pl.drawX += (pl.posX * tileSize - pl.drawX) * slideSpeed * GetFrameTime();
+        pl.drawY += (pl.posY * tileSize - pl.drawY) * slideSpeed * GetFrameTime();
 
         BeginDrawing();
         ClearBackground(BLACK);
@@ -177,7 +179,7 @@ int main() {
                 }
             }
         }
-        DrawTexture(playerTex, pl.posX * tileSize, pl.posY * tileSize, WHITE);
+        DrawTexture(playerTex, (int)pl.drawX, (int)pl.drawY, WHITE);
 
         if (lvlWin) {
             DrawText("YOU WIN!", 310, 320, 40, GOLD);
@@ -287,8 +289,8 @@ void controlMechanics(Player &pl, int lvl[16][16]) {
             }
         }
 }
-void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16]) {
-    pl = {x, y};
+void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize) {
+    pl = {x, y, (x * tileSize), (y * tileSize)};
     for (int i = 0; i < 16; i++) {
         for (int j = 0; j < 16; j++) {
             lvl[i][j] = nextLvl[i][j];
