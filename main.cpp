@@ -6,11 +6,11 @@ struct Player {
     int posY;
 };
 
-void controlMechanics(Player &player, int level[16][16]);
+void controlMechanics(Player &pl, int lvl[16][16]);
 
 int main() {
 
-    Player player = {5, 9};
+    Player pl = {5, 9};
 
     InitWindow(768, 768, "Sokoban");
     SetTargetFPS(60);
@@ -25,7 +25,7 @@ int main() {
     Texture2D winBox = LoadTexture("images/sprite_winbox.png");
 
     int tileSize = brickTex.width;
-    int level[16][16] = {
+    int lvl[16][16] = {
         {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
         {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
         {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
@@ -46,20 +46,20 @@ int main() {
 
     while (WindowShouldClose() == false) {
 
-        bool levelWin = true;
+        bool lvlWin = true;
 
         for (int i = 0; i < 16; i++) {
             for (int j = 0; j < 16; j++) {
-                if (level[i][j] == 3) {
-                    levelWin = false;
+                if (lvl[i][j] == 3) {
+                    lvlWin = false;
                 }
             }
         }
 
-        if (levelWin) {
+        if (lvlWin) {
             
         } else {
-            controlMechanics(player, level);
+            controlMechanics(pl, lvl);
         }
 
         BeginDrawing();
@@ -67,24 +67,24 @@ int main() {
 
         for (int i = 0; i < 16; i++) {
             for (int j = 0; j < 16; j++) {
-                if (level[i][j] == 1) {
+                if (lvl[i][j] == 1) {
                     DrawTexture(brickTex, j * tileSize, i * tileSize, WHITE);
-                } else if (level[i][j] == 2) {
+                } else if (lvl[i][j] == 2) {
                     DrawTexture(boxTex, j * tileSize, i * tileSize, WHITE);
-                } else if (level[i][j] == 3) {
+                } else if (lvl[i][j] == 3) {
                     DrawTexture(winTex, j * tileSize, i * tileSize, WHITE);
-                } else if (level[i][j] == 4) {
+                } else if (lvl[i][j] == 4) {
                     DrawTexture(winBox, j * tileSize, i * tileSize, WHITE);
-                } else if (level[i][j] == 0) {
+                } else if (lvl[i][j] == 0) {
                     DrawTexture(grassTex, j * tileSize, i * tileSize, WHITE);
                 } else {
                     //Prints black.
                 }
             }
         }
-        DrawTexture(playerTex, player.posX * tileSize, player.posY * tileSize, WHITE);
+        DrawTexture(playerTex, pl.posX * tileSize, pl.posY * tileSize, WHITE);
 
-        if (levelWin) {
+        if (lvlWin) {
             DrawText("YOU WON!", 350, 350, 40, GOLD);
         }
 
@@ -100,92 +100,92 @@ int main() {
     return 0;
 }
 
-void controlMechanics(Player &player, int level[16][16]) {
+void controlMechanics(Player &pl, int lvl[16][16]) {
         if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) {
-            if (level[player.posY][player.posX + 1] == 0 || level[player.posY][player.posX + 1] == 3) {
-                player.posX += 1;
-            } else if ((level[player.posY][player.posX + 1] == 2 || level[player.posY][player.posX + 1] == 4) && (level[player.posY][player.posX + 2] == 0 || level[player.posY][player.posX + 2] == 3)) {
-                if (level[player.posY][player.posX + 1] == 4) {
-                    player.posX += 1;
-                    level[player.posY][player.posX] = 3;
-                    if (level[player.posY][player.posX + 1] == 3) {
-                        level[player.posY][player.posX + 1] = 4;
+            if (lvl[pl.posY][pl.posX + 1] == 0 || lvl[pl.posY][pl.posX + 1] == 3) {
+                pl.posX += 1;
+            } else if ((lvl[pl.posY][pl.posX + 1] == 2 || lvl[pl.posY][pl.posX + 1] == 4) && (lvl[pl.posY][pl.posX + 2] == 0 || lvl[pl.posY][pl.posX + 2] == 3)) {
+                if (lvl[pl.posY][pl.posX + 1] == 4) {
+                    pl.posX += 1;
+                    lvl[pl.posY][pl.posX] = 3;
+                    if (lvl[pl.posY][pl.posX + 1] == 3) {
+                        lvl[pl.posY][pl.posX + 1] = 4;
                     } else {
-                        level[player.posY][player.posX + 1] = 2;
+                        lvl[pl.posY][pl.posX + 1] = 2;
                     }
                 } else {
-                    player.posX += 1;
-                    level[player.posY][player.posX] = 0;
-                    if (level[player.posY][player.posX + 1] == 3) {
-                        level[player.posY][player.posX + 1] = 4;
+                    pl.posX += 1;
+                    lvl[pl.posY][pl.posX] = 0;
+                    if (lvl[pl.posY][pl.posX + 1] == 3) {
+                        lvl[pl.posY][pl.posX + 1] = 4;
                     } else {
-                        level[player.posY][player.posX + 1] = 2;
+                        lvl[pl.posY][pl.posX + 1] = 2;
                     }
                 }
             }
         } else if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) {
-            if (level[player.posY][player.posX - 1] == 0 || level[player.posY][player.posX - 1] == 3) {
-                player.posX -= 1;
-            } else if ((level[player.posY][player.posX - 1] == 2 || level[player.posY][player.posX - 1] == 4) && (level[player.posY][player.posX - 2] == 0 || level[player.posY][player.posX - 2] == 3)) {
-                if (level[player.posY][player.posX - 1] == 4) {
-                    player.posX -= 1;
-                    level[player.posY][player.posX] = 3;
-                    if (level[player.posY][player.posX - 1] == 3) {
-                        level[player.posY][player.posX - 1] = 4;
+            if (lvl[pl.posY][pl.posX - 1] == 0 || lvl[pl.posY][pl.posX - 1] == 3) {
+                pl.posX -= 1;
+            } else if ((lvl[pl.posY][pl.posX - 1] == 2 || lvl[pl.posY][pl.posX - 1] == 4) && (lvl[pl.posY][pl.posX - 2] == 0 || lvl[pl.posY][pl.posX - 2] == 3)) {
+                if (lvl[pl.posY][pl.posX - 1] == 4) {
+                    pl.posX -= 1;
+                    lvl[pl.posY][pl.posX] = 3;
+                    if (lvl[pl.posY][pl.posX - 1] == 3) {
+                        lvl[pl.posY][pl.posX - 1] = 4;
                     } else {
-                        level[player.posY][player.posX - 1] = 2;
+                        lvl[pl.posY][pl.posX - 1] = 2;
                     }
                 } else {
-                    player.posX -= 1;
-                    level[player.posY][player.posX] = 0;
-                    if (level[player.posY][player.posX - 1] == 3) {
-                        level[player.posY][player.posX - 1] = 4;
+                    pl.posX -= 1;
+                    lvl[pl.posY][pl.posX] = 0;
+                    if (lvl[pl.posY][pl.posX - 1] == 3) {
+                        lvl[pl.posY][pl.posX - 1] = 4;
                     } else {
-                        level[player.posY][player.posX - 1] = 2;
+                        lvl[pl.posY][pl.posX - 1] = 2;
                     }
                 }
             }
         } else if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN)) {
-            if (level[player.posY + 1][player.posX] == 0 || level[player.posY + 1][player.posX] == 3) {
-                player.posY += 1;
-            } else if ((level[player.posY + 1][player.posX] == 2 || level[player.posY + 1][player.posX] == 4) && (level[player.posY + 2][player.posX] == 0 || level[player.posY + 2][player.posX] == 3)) {
-                if (level[player.posY + 1][player.posX] == 4) {
-                    player.posY += 1;
-                    level[player.posY][player.posX] = 3;
-                    if (level[player.posY + 1][player.posX] == 3) {
-                        level[player.posY + 1][player.posX] = 4;
+            if (lvl[pl.posY + 1][pl.posX] == 0 || lvl[pl.posY + 1][pl.posX] == 3) {
+                pl.posY += 1;
+            } else if ((lvl[pl.posY + 1][pl.posX] == 2 || lvl[pl.posY + 1][pl.posX] == 4) && (lvl[pl.posY + 2][pl.posX] == 0 || lvl[pl.posY + 2][pl.posX] == 3)) {
+                if (lvl[pl.posY + 1][pl.posX] == 4) {
+                    pl.posY += 1;
+                    lvl[pl.posY][pl.posX] = 3;
+                    if (lvl[pl.posY + 1][pl.posX] == 3) {
+                        lvl[pl.posY + 1][pl.posX] = 4;
                     } else {
-                        level[player.posY + 1][player.posX] = 2;
+                        lvl[pl.posY + 1][pl.posX] = 2;
                     }
                 } else {
-                    player.posY += 1;
-                    level[player.posY][player.posX] = 0;
-                    if (level[player.posY + 1][player.posX] == 3) {
-                        level[player.posY + 1][player.posX] = 4;
+                    pl.posY += 1;
+                    lvl[pl.posY][pl.posX] = 0;
+                    if (lvl[pl.posY + 1][pl.posX] == 3) {
+                        lvl[pl.posY + 1][pl.posX] = 4;
                     } else {
-                        level[player.posY + 1][player.posX] = 2;
+                        lvl[pl.posY + 1][pl.posX] = 2;
                     }
                 }
             }
         } else if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) {
-            if (level[player.posY - 1][player.posX] == 0 || level[player.posY - 1][player.posX] == 3) {
-                player.posY -= 1;
-            } else if ((level[player.posY - 1][player.posX] == 2 || level[player.posY - 1][player.posX] == 4) && (level[player.posY - 2][player.posX] == 0 || level[player.posY - 2][player.posX] == 3)) {
-                if (level[player.posY - 1][player.posX] == 4) {
-                    player.posY -= 1;
-                    level[player.posY][player.posX] = 3;
-                    if (level[player.posY - 1][player.posX] == 3) {
-                        level[player.posY - 1][player.posX] = 4;
+            if (lvl[pl.posY - 1][pl.posX] == 0 || lvl[pl.posY - 1][pl.posX] == 3) {
+                pl.posY -= 1;
+            } else if ((lvl[pl.posY - 1][pl.posX] == 2 || lvl[pl.posY - 1][pl.posX] == 4) && (lvl[pl.posY - 2][pl.posX] == 0 || lvl[pl.posY - 2][pl.posX] == 3)) {
+                if (lvl[pl.posY - 1][pl.posX] == 4) {
+                    pl.posY -= 1;
+                    lvl[pl.posY][pl.posX] = 3;
+                    if (lvl[pl.posY - 1][pl.posX] == 3) {
+                        lvl[pl.posY - 1][pl.posX] = 4;
                     } else {
-                        level[player.posY - 1][player.posX] = 2;
+                        lvl[pl.posY - 1][pl.posX] = 2;
                     }
                 } else {
-                    player.posY -= 1;
-                    level[player.posY][player.posX] = 0;
-                    if (level[player.posY - 1][player.posX] == 3) {
-                        level[player.posY - 1][player.posX] = 4;
+                    pl.posY -= 1;
+                    lvl[pl.posY][pl.posX] = 0;
+                    if (lvl[pl.posY - 1][pl.posX] == 3) {
+                        lvl[pl.posY - 1][pl.posX] = 4;
                     } else {
-                        level[player.posY - 1][player.posX] = 2;
+                        lvl[pl.posY - 1][pl.posX] = 2;
                     }
                 }
             }
