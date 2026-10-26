@@ -6,6 +6,8 @@ struct Player {
     int posY;
 };
 
+void controlMechanics(Player &player, int level[16][16]);
+
 int main() {
 
     Player player = {5, 9};
@@ -41,10 +43,64 @@ int main() {
         {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
         {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
     };
-    bool levelWin = true;
 
     while (WindowShouldClose() == false) {
 
+        bool levelWin = true;
+
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 16; j++) {
+                if (level[i][j] == 3) {
+                    levelWin = false;
+                }
+            }
+        }
+
+        if (levelWin) {
+            
+        } else {
+            controlMechanics(player, level);
+        }
+
+        BeginDrawing();
+        ClearBackground(BLACK);
+
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 16; j++) {
+                if (level[i][j] == 1) {
+                    DrawTexture(brickTex, j * tileSize, i * tileSize, WHITE);
+                } else if (level[i][j] == 2) {
+                    DrawTexture(boxTex, j * tileSize, i * tileSize, WHITE);
+                } else if (level[i][j] == 3) {
+                    DrawTexture(winTex, j * tileSize, i * tileSize, WHITE);
+                } else if (level[i][j] == 4) {
+                    DrawTexture(winBox, j * tileSize, i * tileSize, WHITE);
+                } else if (level[i][j] == 0) {
+                    DrawTexture(grassTex, j * tileSize, i * tileSize, WHITE);
+                } else {
+                    //Prints black.
+                }
+            }
+        }
+        DrawTexture(playerTex, player.posX * tileSize, player.posY * tileSize, WHITE);
+
+        if (levelWin) {
+            DrawText("YOU WON!", 350, 350, 40, GOLD);
+        }
+
+        EndDrawing();
+    }
+
+    UnloadTexture(brickTex);
+    UnloadTexture(grassTex);
+    UnloadTexture(playerTex);
+
+    CloseWindow();
+
+    return 0;
+}
+
+void controlMechanics(Player &player, int level[16][16]) {
         if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) {
             if (level[player.posY][player.posX + 1] == 0 || level[player.posY][player.posX + 1] == 3) {
                 player.posX += 1;
@@ -134,49 +190,4 @@ int main() {
                 }
             }
         }
-
-        for (int i = 0; i < 16; i++) {
-            for (int j = 0; j < 16; j++) {
-                if (level[i][j] == 3) {
-                    levelWin = false;
-                }
-            }
-        }
-
-        BeginDrawing();
-        ClearBackground(BLACK);
-
-        if (levelWin) {
-            DrawText("YOU WON!", 350, 350, 40, GOLD);
-        }
-
-        for (int i = 0; i < 16; i++) {
-            for (int j = 0; j < 16; j++) {
-                if (level[i][j] == 1) {
-                    DrawTexture(brickTex, j * tileSize, i * tileSize, WHITE);
-                } else if (level[i][j] == 2) {
-                    DrawTexture(boxTex, j * tileSize, i * tileSize, WHITE);
-                } else if (level[i][j] == 3) {
-                    DrawTexture(winTex, j * tileSize, i * tileSize, WHITE);
-                } else if (level[i][j] == 4) {
-                    DrawTexture(winBox, j * tileSize, i * tileSize, WHITE);
-                } else if (level[i][j] == 0) {
-                    DrawTexture(grassTex, j * tileSize, i * tileSize, WHITE);
-                } else {
-                    //Prints black.
-                }
-            }
-        }
-        DrawTexture(playerTex, player.posX * tileSize, player.posY * tileSize, WHITE);
-
-        EndDrawing();
-    }
-
-    UnloadTexture(brickTex);
-    UnloadTexture(grassTex);
-    UnloadTexture(playerTex);
-
-    CloseWindow();
-
-    return 0;
 }
