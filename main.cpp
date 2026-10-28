@@ -1,6 +1,23 @@
 #include <raylib.h>
 #include <cmath>
-
+int lvl1[16][16] = {
+    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+    {5, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5},
+    {5, 5, 5, 5, 1, 1, 0, 0, 2, 3, 0, 1, 5, 5, 5, 5},
+    {5, 5, 5, 5, 1, 3, 3, 0, 0, 0, 0, 1, 5, 5, 5, 5},
+    {5, 5, 5, 5, 1, 0, 0, 2, 0, 1, 1, 1, 5, 5, 5, 5},
+    {5, 5, 5, 5, 1, 1, 1, 1, 2, 0, 0, 1, 5, 5, 5, 5},
+    {5, 5, 5, 5, 1, 0, 0, 0, 0, 0, 0, 1, 5, 5, 5, 5},
+    {5, 5, 5, 5, 1, 0, 0, 0, 1, 0, 0, 1, 5, 5, 5, 5},
+    {5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5},
+    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
+    {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
+};
 int lvl2[16][16] = {
     {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
     {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
@@ -83,6 +100,7 @@ struct Player {
 
 void controlMechanics(Player &pl, int lvl[16][16], int &moveCount);
 void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize);
+void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16]);
 
 int main() {
 
@@ -155,6 +173,28 @@ int main() {
             }
         } else {
             controlMechanics(pl, lvl, moveCount);
+        }
+
+        if (IsKeyPressed(KEY_R)) {
+            switch (currentLevel) {
+                case 1:
+                    resetLevel(pl, 5, 9, lvl, lvl1);
+                    break;
+                case 2:
+                    resetLevel(pl, 5, 10, lvl, lvl2);
+                    break;
+                case 3:
+                    resetLevel(pl, 7, 10, lvl, lvl3);
+                    break;
+                case 4:
+                    resetLevel(pl, 4, 8, lvl, lvl4);
+                    break;
+                case 5:
+                    resetLevel(pl, 5, 10, lvl, lvl5);
+                    break;
+                default:
+                    break;
+            }
         }
 
         pl.drawX += (pl.posX * tileSize - pl.drawX) / 2;
@@ -322,4 +362,13 @@ void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16],
             lvl[i][j] = nextLvl[i][j];
         }
     }
+}
+void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16]) {
+    for (int i = 0; i < 16; i++) {
+        for (int j = 0; j < 16; j++) {
+            lvl[i][j] = resetLvl[i][j];
+        }
+    }
+    pl.posX = x;
+    pl.posY = y;
 }
