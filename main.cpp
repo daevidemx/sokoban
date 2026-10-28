@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <cmath>
 
 int lvl2[16][16] = {
     {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
@@ -158,6 +159,13 @@ int main() {
         float slideSpeed = 20.0f;
         pl.drawX += (pl.posX * tileSize - pl.drawX) * slideSpeed * GetFrameTime();
         pl.drawY += (pl.posY * tileSize - pl.drawY) * slideSpeed * GetFrameTime();
+
+        if (abs((pl.posX * tileSize) - pl.drawX) < 0.5f) {
+            pl.drawX = pl.posX * tileSize;
+        }
+        if (abs((pl.posY * tileSize) - pl.drawY) < 0.5f) {
+            pl.drawY = pl.posY * tileSize;
+        }
 
         BeginDrawing();
         ClearBackground(BLACK);
