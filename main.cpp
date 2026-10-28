@@ -81,7 +81,7 @@ struct Player {
     float drawY;
 };
 
-void controlMechanics(Player &pl, int lvl[16][16]);
+void controlMechanics(Player &pl, int lvl[16][16], int &moveCount);
 void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize);
 
 int main() {
@@ -119,6 +119,7 @@ int main() {
         {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5}
     };
     int currentLevel = 1;
+    int moveCount = 0;
 
     while (WindowShouldClose() == false) {
 
@@ -153,17 +154,16 @@ int main() {
                 }
             }
         } else {
-            controlMechanics(pl, lvl);
+            controlMechanics(pl, lvl, moveCount);
         }
 
-        float slideSpeed = 20.0f;
-        pl.drawX += (pl.posX * tileSize - pl.drawX) * slideSpeed * GetFrameTime();
-        pl.drawY += (pl.posY * tileSize - pl.drawY) * slideSpeed * GetFrameTime();
+        pl.drawX += (pl.posX * tileSize - pl.drawX) / 2;
+        pl.drawY += (pl.posY * tileSize - pl.drawY) / 2;
 
-        if (abs((pl.posX * tileSize) - pl.drawX) < 0.5f) {
+        if (abs(pl.drawX - pl.posX * tileSize) < 0.5f) {
             pl.drawX = pl.posX * tileSize;
         }
-        if (abs((pl.posY * tileSize) - pl.drawY) < 0.5f) {
+        if (abs(pl.drawY - pl.posY * tileSize) < 0.5f) {
             pl.drawY = pl.posY * tileSize;
         }
 
@@ -187,7 +187,8 @@ int main() {
                 }
             }
         }
-        DrawTexture(playerTex, (int)pl.drawX, (int)pl.drawY, WHITE);
+        DrawTexture(playerTex, pl.drawX, pl.drawY, WHITE);
+        DrawText(TextFormat("Moves: %d", moveCount), 0, 750, 20, WHITE);
 
         if (lvlWin) {
             DrawText("YOU WIN!", 310, 320, 40, GOLD);
@@ -200,19 +201,26 @@ int main() {
     UnloadTexture(brickTex);
     UnloadTexture(grassTex);
     UnloadTexture(playerTex);
+    UnloadTexture(boxTex);
+    UnloadTexture(winTex);
+
+    //TEMP
+    UnloadTexture(winBox);
 
     CloseWindow();
 
     return 0;
 }
 
-void controlMechanics(Player &pl, int lvl[16][16]) {
+void controlMechanics(Player &pl, int lvl[16][16], int &moveCount) {
         if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) {
             if (lvl[pl.posY][pl.posX + 1] == 0 || lvl[pl.posY][pl.posX + 1] == 3) {
                 pl.posX += 1;
+                moveCount++;
             } else if ((lvl[pl.posY][pl.posX + 1] == 2 || lvl[pl.posY][pl.posX + 1] == 4) && (lvl[pl.posY][pl.posX + 2] == 0 || lvl[pl.posY][pl.posX + 2] == 3)) {
                 if (lvl[pl.posY][pl.posX + 1] == 4) {
                     pl.posX += 1;
+                    moveCount++;
                     lvl[pl.posY][pl.posX] = 3;
                     if (lvl[pl.posY][pl.posX + 1] == 3) {
                         lvl[pl.posY][pl.posX + 1] = 4;
@@ -221,6 +229,7 @@ void controlMechanics(Player &pl, int lvl[16][16]) {
                     }
                 } else {
                     pl.posX += 1;
+                    moveCount++;
                     lvl[pl.posY][pl.posX] = 0;
                     if (lvl[pl.posY][pl.posX + 1] == 3) {
                         lvl[pl.posY][pl.posX + 1] = 4;
@@ -232,9 +241,11 @@ void controlMechanics(Player &pl, int lvl[16][16]) {
         } else if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) {
             if (lvl[pl.posY][pl.posX - 1] == 0 || lvl[pl.posY][pl.posX - 1] == 3) {
                 pl.posX -= 1;
+                moveCount++;
             } else if ((lvl[pl.posY][pl.posX - 1] == 2 || lvl[pl.posY][pl.posX - 1] == 4) && (lvl[pl.posY][pl.posX - 2] == 0 || lvl[pl.posY][pl.posX - 2] == 3)) {
                 if (lvl[pl.posY][pl.posX - 1] == 4) {
                     pl.posX -= 1;
+                    moveCount++;
                     lvl[pl.posY][pl.posX] = 3;
                     if (lvl[pl.posY][pl.posX - 1] == 3) {
                         lvl[pl.posY][pl.posX - 1] = 4;
@@ -243,6 +254,7 @@ void controlMechanics(Player &pl, int lvl[16][16]) {
                     }
                 } else {
                     pl.posX -= 1;
+                    moveCount++;
                     lvl[pl.posY][pl.posX] = 0;
                     if (lvl[pl.posY][pl.posX - 1] == 3) {
                         lvl[pl.posY][pl.posX - 1] = 4;
@@ -254,9 +266,11 @@ void controlMechanics(Player &pl, int lvl[16][16]) {
         } else if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN)) {
             if (lvl[pl.posY + 1][pl.posX] == 0 || lvl[pl.posY + 1][pl.posX] == 3) {
                 pl.posY += 1;
+                moveCount++;
             } else if ((lvl[pl.posY + 1][pl.posX] == 2 || lvl[pl.posY + 1][pl.posX] == 4) && (lvl[pl.posY + 2][pl.posX] == 0 || lvl[pl.posY + 2][pl.posX] == 3)) {
                 if (lvl[pl.posY + 1][pl.posX] == 4) {
                     pl.posY += 1;
+                    moveCount++;
                     lvl[pl.posY][pl.posX] = 3;
                     if (lvl[pl.posY + 1][pl.posX] == 3) {
                         lvl[pl.posY + 1][pl.posX] = 4;
@@ -265,6 +279,7 @@ void controlMechanics(Player &pl, int lvl[16][16]) {
                     }
                 } else {
                     pl.posY += 1;
+                    moveCount++;
                     lvl[pl.posY][pl.posX] = 0;
                     if (lvl[pl.posY + 1][pl.posX] == 3) {
                         lvl[pl.posY + 1][pl.posX] = 4;
@@ -276,9 +291,11 @@ void controlMechanics(Player &pl, int lvl[16][16]) {
         } else if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) {
             if (lvl[pl.posY - 1][pl.posX] == 0 || lvl[pl.posY - 1][pl.posX] == 3) {
                 pl.posY -= 1;
+                moveCount++;
             } else if ((lvl[pl.posY - 1][pl.posX] == 2 || lvl[pl.posY - 1][pl.posX] == 4) && (lvl[pl.posY - 2][pl.posX] == 0 || lvl[pl.posY - 2][pl.posX] == 3)) {
                 if (lvl[pl.posY - 1][pl.posX] == 4) {
                     pl.posY -= 1;
+                    moveCount++;
                     lvl[pl.posY][pl.posX] = 3;
                     if (lvl[pl.posY - 1][pl.posX] == 3) {
                         lvl[pl.posY - 1][pl.posX] = 4;
@@ -287,6 +304,7 @@ void controlMechanics(Player &pl, int lvl[16][16]) {
                     }
                 } else {
                     pl.posY -= 1;
+                    moveCount++;
                     lvl[pl.posY][pl.posX] = 0;
                     if (lvl[pl.posY - 1][pl.posX] == 3) {
                         lvl[pl.posY - 1][pl.posX] = 4;
