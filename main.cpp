@@ -105,10 +105,14 @@ struct Box {
     float drawX;
     float drawY;
 };
+struct Target {
+    int posX;
+    int posY;
+};
 
 void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<Box> &boxes);
-void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize, std::vector<Box> &boxes);
-void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16], int tileSize, std::vector<Box> &boxes);
+void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize, std::vector<Box> &boxes, std::vector<Target> &targets, int &moveCount);
+void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16], int tileSize, std::vector<Box> &boxes, int &moveCount);
 
 int main() {
 
@@ -144,17 +148,25 @@ int main() {
     int currentLevel = 1;
     int moveCount = 0;
     std::vector<Box> boxes;
+    std::vector<Target> targets;
 
-    changeLevel(pl, 5, 10, lvl, lvl1, tileSize, boxes);
+    changeLevel(pl, 5, 10, lvl, lvl1, tileSize, boxes, targets, moveCount);
 
     while (WindowShouldClose() == false) {
 
-        bool lvlWin = true;
+        bool lvlWin = false;
+        int onTarget = 0;
 
-        for (int i = 0; i < 16; i++) {
-            for (int j = 0; j < 16; j++) {
-                if (lvl[i][j] == 3) {
-                    lvlWin = false;
+        for (Box b : boxes) {
+            for (Target t : targets) {
+                if (b.posX == t.posX && b.posY == t.posY) {
+                    onTarget++;
+                    if (onTarget == targets.size()) {
+                        lvlWin = true;
+                        break;
+                    } else {
+                        break;
+                    }
                 }
             }
         }
@@ -164,16 +176,16 @@ int main() {
                 currentLevel++;
                 switch (currentLevel) {
                     case 2:
-                        changeLevel(pl, 5, 10, lvl, lvl2, tileSize, boxes);
+                        changeLevel(pl, 5, 10, lvl, lvl2, tileSize, boxes, targets, moveCount);
                         break;
                     case 3:
-                        changeLevel(pl, 7, 10, lvl, lvl3, tileSize, boxes);
+                        changeLevel(pl, 7, 10, lvl, lvl3, tileSize, boxes, targets, moveCount);
                         break;
                     case 4:
-                        changeLevel(pl, 4, 8, lvl, lvl4, tileSize, boxes);
+                        changeLevel(pl, 4, 8, lvl, lvl4, tileSize, boxes, targets, moveCount);
                         break;
                     case 5:
-                        changeLevel(pl, 5, 10, lvl, lvl5, tileSize, boxes);
+                        changeLevel(pl, 5, 10, lvl, lvl5, tileSize, boxes, targets, moveCount);
                         break;
                     default:
                         break;
@@ -186,19 +198,19 @@ int main() {
         if (IsKeyPressed(KEY_R)) {
             switch (currentLevel) {
                 case 1:
-                    resetLevel(pl, 5, 9, lvl, lvl1, tileSize, boxes);
+                    resetLevel(pl, 5, 9, lvl, lvl1, tileSize, boxes, moveCount);
                     break;
                 case 2:
-                    resetLevel(pl, 5, 10, lvl, lvl2, tileSize, boxes);
+                    resetLevel(pl, 5, 10, lvl, lvl2, tileSize, boxes, moveCount);
                     break;
                 case 3:
-                    resetLevel(pl, 7, 10, lvl, lvl3, tileSize, boxes);
+                    resetLevel(pl, 7, 10, lvl, lvl3, tileSize, boxes, moveCount);
                     break;
                 case 4:
-                    resetLevel(pl, 4, 8, lvl, lvl4, tileSize, boxes);
+                    resetLevel(pl, 4, 8, lvl, lvl4, tileSize, boxes, moveCount);
                     break;
                 case 5:
-                    resetLevel(pl, 5, 10, lvl, lvl5, tileSize, boxes);
+                    resetLevel(pl, 5, 10, lvl, lvl5, tileSize, boxes, moveCount);
                     break;
                 default:
                     break;
@@ -363,22 +375,27 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
             }
         }
 }
-void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize, std::vector<Box> &boxes) {
+void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize, std::vector<Box> &boxes, std::vector<Target> &targets, int &moveCount) {
     boxes.clear();
+    moveCount = 0;
     pl = {x, y, (x * tileSize), (y * tileSize)};
     for (int i = 0; i < 16; i++) {
         for (int j = 0; j < 16; j++) {
             if (nextLvl[i][j] == 2) {
                 boxes.push_back({j, i, (float)j * tileSize, (float)i * tileSize});
                 lvl[i][j] = 0;
+            } else if (nextLvl[i][j] == 3) {
+                targets.push_back({j, i});
+                lvl[i][j] = 3;
             } else {
                 lvl[i][j] = nextLvl[i][j];
             }
         }
     }
 }
-void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16], int tileSize, std::vector<Box> &boxes) {
+void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16], int tileSize, std::vector<Box> &boxes, int &moveCount) {
     boxes.clear();
+    moveCount = 0;
     for (int i = 0; i < 16; i++) {
         for (int j = 0; j < 16; j++) {
             if (resetLvl[i][j] == 2) {
