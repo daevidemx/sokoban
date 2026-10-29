@@ -108,7 +108,7 @@ struct Box {
 
 void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<Box> &boxes);
 void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize, std::vector<Box> &boxes);
-void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16]);
+void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16], int tileSize, std::vector<Box> &boxes);
 
 int main() {
 
@@ -120,9 +120,6 @@ int main() {
     Texture2D playerTex = LoadTexture("images/sprite_player.png");
     Texture2D boxTex = LoadTexture("images/sprite_box.png");
     Texture2D winTex = LoadTexture("images/sprite_win.png");
-
-    //TEMP
-    Texture2D winBox = LoadTexture("images/sprite_winbox.png");
 
     int tileSize = brickTex.width;
     Player pl = {5, 9, 5.0f * tileSize, 9.0f * tileSize};
@@ -189,19 +186,19 @@ int main() {
         if (IsKeyPressed(KEY_R)) {
             switch (currentLevel) {
                 case 1:
-                    resetLevel(pl, 5, 9, lvl, lvl1);
+                    resetLevel(pl, 5, 9, lvl, lvl1, tileSize, boxes);
                     break;
                 case 2:
-                    resetLevel(pl, 5, 10, lvl, lvl2);
+                    resetLevel(pl, 5, 10, lvl, lvl2, tileSize, boxes);
                     break;
                 case 3:
-                    resetLevel(pl, 7, 10, lvl, lvl3);
+                    resetLevel(pl, 7, 10, lvl, lvl3, tileSize, boxes);
                     break;
                 case 4:
-                    resetLevel(pl, 4, 8, lvl, lvl4);
+                    resetLevel(pl, 4, 8, lvl, lvl4, tileSize, boxes);
                     break;
                 case 5:
-                    resetLevel(pl, 5, 10, lvl, lvl5);
+                    resetLevel(pl, 5, 10, lvl, lvl5, tileSize, boxes);
                     break;
                 default:
                     break;
@@ -261,9 +258,6 @@ int main() {
     UnloadTexture(playerTex);
     UnloadTexture(boxTex);
     UnloadTexture(winTex);
-
-    //TEMP
-    UnloadTexture(winBox);
 
     CloseWindow();
 
@@ -383,10 +377,16 @@ void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16],
         }
     }
 }
-void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16]) {
+void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16], int tileSize, std::vector<Box> &boxes) {
+    boxes.clear();
     for (int i = 0; i < 16; i++) {
         for (int j = 0; j < 16; j++) {
-            lvl[i][j] = resetLvl[i][j];
+            if (resetLvl[i][j] == 2) {
+                boxes.push_back({j, i, (float)j * tileSize, (float)i * tileSize});
+                lvl[i][j] = 0;
+            } else {
+                lvl[i][j] = resetLvl[i][j];
+            }
         }
     }
     pl.posX = x;
