@@ -1,5 +1,7 @@
 #include <raylib.h>
 #include <cmath>
+#include <vector>
+
 int lvl1[16][16] = {
     {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
     {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
@@ -97,9 +99,15 @@ struct Player {
     float drawX;
     float drawY;
 };
+struct Box {
+    int posX;
+    int posY;
+    float drawX;
+    float drawY;
+};
 
 void controlMechanics(Player &pl, int lvl[16][16], int &moveCount);
-void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize);
+void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize, std::vector<Box> &boxes);
 void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16]);
 
 int main() {
@@ -124,10 +132,10 @@ int main() {
         {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
         {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
         {5, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5},
-        {5, 5, 5, 5, 1, 1, 0, 0, 2, 3, 0, 1, 5, 5, 5, 5},
+        {5, 5, 5, 5, 1, 1, 0, 0, 0, 3, 0, 1, 5, 5, 5, 5},
         {5, 5, 5, 5, 1, 3, 3, 0, 0, 0, 0, 1, 5, 5, 5, 5},
-        {5, 5, 5, 5, 1, 0, 0, 2, 0, 1, 1, 1, 5, 5, 5, 5},
-        {5, 5, 5, 5, 1, 1, 1, 1, 2, 0, 0, 1, 5, 5, 5, 5},
+        {5, 5, 5, 5, 1, 0, 0, 0, 0, 1, 1, 1, 5, 5, 5, 5},
+        {5, 5, 5, 5, 1, 1, 1, 1, 0, 0, 0, 1, 5, 5, 5, 5},
         {5, 5, 5, 5, 1, 0, 0, 0, 0, 0, 0, 1, 5, 5, 5, 5},
         {5, 5, 5, 5, 1, 0, 0, 0, 1, 0, 0, 1, 5, 5, 5, 5},
         {5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5},
@@ -138,6 +146,9 @@ int main() {
     };
     int currentLevel = 1;
     int moveCount = 0;
+    std::vector<Box> boxes;
+
+    changeLevel(pl, 5, 10, lvl, lvl1, tileSize, boxes);
 
     while (WindowShouldClose() == false) {
 
@@ -156,16 +167,16 @@ int main() {
                 currentLevel++;
                 switch (currentLevel) {
                     case 2:
-                        changeLevel(pl, 5, 10, lvl, lvl2, tileSize);
+                        changeLevel(pl, 5, 10, lvl, lvl2, tileSize, boxes);
                         break;
                     case 3:
-                        changeLevel(pl, 7, 10, lvl, lvl3, tileSize);
+                        changeLevel(pl, 7, 10, lvl, lvl3, tileSize, boxes);
                         break;
                     case 4:
-                        changeLevel(pl, 4, 8, lvl, lvl4, tileSize);
+                        changeLevel(pl, 4, 8, lvl, lvl4, tileSize, boxes);
                         break;
                     case 5:
-                        changeLevel(pl, 5, 10, lvl, lvl5, tileSize);
+                        changeLevel(pl, 5, 10, lvl, lvl5, tileSize, boxes);
                         break;
                     default:
                         break;
@@ -214,13 +225,9 @@ int main() {
             for (int j = 0; j < 16; j++) {
                 if (lvl[i][j] == 1) {
                     DrawTexture(brickTex, j * tileSize, i * tileSize, WHITE);
-                } else if (lvl[i][j] == 2) {
-                    DrawTexture(boxTex, j * tileSize, i * tileSize, WHITE);
                 } else if (lvl[i][j] == 3) {
                     DrawTexture(winTex, j * tileSize, i * tileSize, WHITE);
-                } else if (lvl[i][j] == 4) {
-                    DrawTexture(winBox, j * tileSize, i * tileSize, WHITE);
-                } else if (lvl[i][j] == 0) {
+                } else if (lvl[i][j] == 0 || lvl[i][j] == 2) {
                     DrawTexture(grassTex, j * tileSize, i * tileSize, WHITE);
                 } else {
                     //Prints black.
@@ -228,6 +235,9 @@ int main() {
             }
         }
         DrawTexture(playerTex, pl.drawX, pl.drawY, WHITE);
+        for (Box &box : boxes) {
+            DrawTexture(boxTex, box.drawX, box.drawY, WHITE);
+        }
         DrawText(TextFormat("Moves: %d", moveCount), 0, 750, 20, WHITE);
 
         if (lvlWin) {
@@ -355,10 +365,14 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount) {
             }
         }
 }
-void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize) {
+void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize, std::vector<Box> &boxes) {
+    boxes.clear();
     pl = {x, y, (x * tileSize), (y * tileSize)};
     for (int i = 0; i < 16; i++) {
         for (int j = 0; j < 16; j++) {
+            if (nextLvl[i][j] == 2) {
+                boxes.push_back({j, i, (float)j * tileSize, (float)i * tileSize});
+            }
             lvl[i][j] = nextLvl[i][j];
         }
     }
