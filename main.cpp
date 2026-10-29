@@ -106,7 +106,7 @@ struct Box {
     float drawY;
 };
 
-void controlMechanics(Player &pl, int lvl[16][16], int &moveCount);
+void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<Box> &boxes);
 void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize, std::vector<Box> &boxes);
 void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16]);
 
@@ -183,7 +183,7 @@ int main() {
                 }
             }
         } else {
-            controlMechanics(pl, lvl, moveCount);
+            controlMechanics(pl, lvl, moveCount, boxes);
         }
 
         if (IsKeyPressed(KEY_R)) {
@@ -235,8 +235,16 @@ int main() {
             }
         }
         DrawTexture(playerTex, pl.drawX, pl.drawY, WHITE);
-        for (Box &box : boxes) {
-            DrawTexture(boxTex, box.drawX, box.drawY, WHITE);
+        for (Box &b : boxes) {
+            b.drawX += (b.posX * tileSize - b.drawX) / 2;
+            b.drawY += (b.posY * tileSize - b.drawY) / 2;
+            if (abs(b.drawX - b.posX * tileSize) < 0.5f) {
+                b.drawX = b.posX * tileSize;
+            }
+            if (abs(b.drawY - b.posY * tileSize) < 0.5f) {
+                b.drawY = b.posY * tileSize;
+            }
+            DrawTexture(boxTex, b.drawX, b.drawY, WHITE);
         }
         DrawText(TextFormat("Moves: %d", moveCount), 0, 750, 20, WHITE);
 
@@ -262,106 +270,102 @@ int main() {
     return 0;
 }
 
-void controlMechanics(Player &pl, int lvl[16][16], int &moveCount) {
+void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<Box> &boxes) {
         if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) {
-            if (lvl[pl.posY][pl.posX + 1] == 0 || lvl[pl.posY][pl.posX + 1] == 3) {
-                pl.posX += 1;
-                moveCount++;
-            } else if ((lvl[pl.posY][pl.posX + 1] == 2 || lvl[pl.posY][pl.posX + 1] == 4) && (lvl[pl.posY][pl.posX + 2] == 0 || lvl[pl.posY][pl.posX + 2] == 3)) {
-                if (lvl[pl.posY][pl.posX + 1] == 4) {
-                    pl.posX += 1;
-                    moveCount++;
-                    lvl[pl.posY][pl.posX] = 3;
-                    if (lvl[pl.posY][pl.posX + 1] == 3) {
-                        lvl[pl.posY][pl.posX + 1] = 4;
-                    } else {
-                        lvl[pl.posY][pl.posX + 1] = 2;
+            bool boxFound = false;
+            for (Box &b : boxes) {
+                if (pl.posX + 1 == b.posX && pl.posY == b.posY) {
+                    boxFound = true;
+                    bool boxBehind = false;
+                    for (Box &b : boxes) {
+                        if (pl.posX + 2 == b.posX && pl.posY == b.posY) {
+                            boxBehind = true;
+                            break;
+                        }
                     }
-                } else {
-                    pl.posX += 1;
-                    moveCount++;
-                    lvl[pl.posY][pl.posX] = 0;
-                    if (lvl[pl.posY][pl.posX + 1] == 3) {
-                        lvl[pl.posY][pl.posX + 1] = 4;
-                    } else {
-                        lvl[pl.posY][pl.posX + 1] = 2;
+                    if (boxBehind == false && (lvl[pl.posY][pl.posX + 2] == 0 || lvl[pl.posY][pl.posX + 2] == 3)) {
+                        pl.posX++;
+                        b.posX++;
+                        moveCount++;
+                        break;
                     }
                 }
+            }
+            if (boxFound == false && (lvl[pl.posY][pl.posX + 1] == 0 || lvl[pl.posY][pl.posX + 1] == 3)) {
+                pl.posX++;
+                moveCount++;
             }
         } else if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) {
-            if (lvl[pl.posY][pl.posX - 1] == 0 || lvl[pl.posY][pl.posX - 1] == 3) {
-                pl.posX -= 1;
-                moveCount++;
-            } else if ((lvl[pl.posY][pl.posX - 1] == 2 || lvl[pl.posY][pl.posX - 1] == 4) && (lvl[pl.posY][pl.posX - 2] == 0 || lvl[pl.posY][pl.posX - 2] == 3)) {
-                if (lvl[pl.posY][pl.posX - 1] == 4) {
-                    pl.posX -= 1;
-                    moveCount++;
-                    lvl[pl.posY][pl.posX] = 3;
-                    if (lvl[pl.posY][pl.posX - 1] == 3) {
-                        lvl[pl.posY][pl.posX - 1] = 4;
-                    } else {
-                        lvl[pl.posY][pl.posX - 1] = 2;
+            bool boxFound = false;
+            for (Box &b : boxes) {
+                if (pl.posX - 1 == b.posX && pl.posY == b.posY) {
+                    boxFound = true;
+                    bool boxBehind = false;
+                    for (Box &b : boxes) {
+                        if (pl.posX - 2 == b.posX && pl.posY == b.posY) {
+                            boxBehind = true;
+                            break;
+                        }
                     }
-                } else {
-                    pl.posX -= 1;
-                    moveCount++;
-                    lvl[pl.posY][pl.posX] = 0;
-                    if (lvl[pl.posY][pl.posX - 1] == 3) {
-                        lvl[pl.posY][pl.posX - 1] = 4;
-                    } else {
-                        lvl[pl.posY][pl.posX - 1] = 2;
+                    if (boxBehind == false && (lvl[pl.posY][pl.posX - 2] == 0 || lvl[pl.posY][pl.posX - 2] == 3)) {
+                        pl.posX--;
+                        b.posX--;
+                        moveCount++;
+                        break;
                     }
                 }
+            }
+            if (boxFound == false && (lvl[pl.posY][pl.posX - 1] == 0 || lvl[pl.posY][pl.posX - 1] == 3)) {
+                pl.posX--;
+                moveCount++;
             }
         } else if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN)) {
-            if (lvl[pl.posY + 1][pl.posX] == 0 || lvl[pl.posY + 1][pl.posX] == 3) {
-                pl.posY += 1;
-                moveCount++;
-            } else if ((lvl[pl.posY + 1][pl.posX] == 2 || lvl[pl.posY + 1][pl.posX] == 4) && (lvl[pl.posY + 2][pl.posX] == 0 || lvl[pl.posY + 2][pl.posX] == 3)) {
-                if (lvl[pl.posY + 1][pl.posX] == 4) {
-                    pl.posY += 1;
-                    moveCount++;
-                    lvl[pl.posY][pl.posX] = 3;
-                    if (lvl[pl.posY + 1][pl.posX] == 3) {
-                        lvl[pl.posY + 1][pl.posX] = 4;
-                    } else {
-                        lvl[pl.posY + 1][pl.posX] = 2;
+            bool boxFound = false;
+            for (Box &b : boxes) {
+                if (pl.posX == b.posX && pl.posY + 1 == b.posY) {
+                    boxFound = true;
+                    bool boxBehind = false;
+                    for (Box &b : boxes) {
+                        if (pl.posX == b.posX && pl.posY + 2 == b.posY) {
+                            boxBehind = true;
+                            break;
+                        }
                     }
-                } else {
-                    pl.posY += 1;
-                    moveCount++;
-                    lvl[pl.posY][pl.posX] = 0;
-                    if (lvl[pl.posY + 1][pl.posX] == 3) {
-                        lvl[pl.posY + 1][pl.posX] = 4;
-                    } else {
-                        lvl[pl.posY + 1][pl.posX] = 2;
+                    if (boxBehind == false && (lvl[pl.posY + 2][pl.posX] == 0 || lvl[pl.posY + 2][pl.posX] == 3)) {
+                        pl.posY++;
+                        b.posY++;
+                        moveCount++;
+                        break;
                     }
                 }
             }
-        } else if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) {
-            if (lvl[pl.posY - 1][pl.posX] == 0 || lvl[pl.posY - 1][pl.posX] == 3) {
-                pl.posY -= 1;
+            if (boxFound == false && (lvl[pl.posY + 1][pl.posX] == 0 || lvl[pl.posY + 1][pl.posX] == 3)) {
+                pl.posY++;
                 moveCount++;
-            } else if ((lvl[pl.posY - 1][pl.posX] == 2 || lvl[pl.posY - 1][pl.posX] == 4) && (lvl[pl.posY - 2][pl.posX] == 0 || lvl[pl.posY - 2][pl.posX] == 3)) {
-                if (lvl[pl.posY - 1][pl.posX] == 4) {
-                    pl.posY -= 1;
-                    moveCount++;
-                    lvl[pl.posY][pl.posX] = 3;
-                    if (lvl[pl.posY - 1][pl.posX] == 3) {
-                        lvl[pl.posY - 1][pl.posX] = 4;
-                    } else {
-                        lvl[pl.posY - 1][pl.posX] = 2;
+            }
+        } else if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) {
+            bool boxFound = false;
+            for (Box &b : boxes) {
+                if (pl.posX == b.posX && pl.posY - 1 == b.posY) {
+                    boxFound = true;
+                    bool boxBehind = false;
+                    for (Box &b : boxes) {
+                        if (pl.posX == b.posX && pl.posY - 2 == b.posY) {
+                            boxBehind = true;
+                            break;
+                        }
                     }
-                } else {
-                    pl.posY -= 1;
-                    moveCount++;
-                    lvl[pl.posY][pl.posX] = 0;
-                    if (lvl[pl.posY - 1][pl.posX] == 3) {
-                        lvl[pl.posY - 1][pl.posX] = 4;
-                    } else {
-                        lvl[pl.posY - 1][pl.posX] = 2;
+                    if (boxBehind == false && (lvl[pl.posY - 2][pl.posX] == 0 || lvl[pl.posY - 2][pl.posX] == 3)) {
+                        pl.posY--;
+                        b.posY--;
+                        moveCount++;
+                        break;
                     }
                 }
+            }
+            if (boxFound == false && (lvl[pl.posY - 1][pl.posX] == 0 || lvl[pl.posY - 1][pl.posX] == 3)) {
+                pl.posY--;
+                moveCount++;
             }
         }
 }
@@ -372,8 +376,10 @@ void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16],
         for (int j = 0; j < 16; j++) {
             if (nextLvl[i][j] == 2) {
                 boxes.push_back({j, i, (float)j * tileSize, (float)i * tileSize});
+                lvl[i][j] = 0;
+            } else {
+                lvl[i][j] = nextLvl[i][j];
             }
-            lvl[i][j] = nextLvl[i][j];
         }
     }
 }
