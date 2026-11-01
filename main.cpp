@@ -110,9 +110,12 @@ struct Target {
     int posY;
 };
 
-void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<Box> &boxes);
+void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<Box> &boxes, std::vector<Player> &plHistory, std::vector<Box> &boxHistory);
 void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize, std::vector<Box> &boxes, std::vector<Target> &targets, int &moveCount);
-void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16], int tileSize, std::vector<Box> &boxes, int &moveCount);
+void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16], int tileSize, std::vector<Box> &boxes, int &moveCount, std::vector<Box> &boxHistory, std::vector<Player> &plHistory);
+void saveMove(std::vector<Player> &plHistory, Player &pl, std::vector<Box> &boxes, std::vector<Box> &boxHistory);
+void undoMove(std::vector<Player> &plHistory, Player &pl, std::vector<Box> &boxes, std::vector<Box> &boxHistory, int &moveCount);
+void delHistory(std::vector<Box> &boxHistory, std::vector<Player> &plHistory);
 
 int main() {
 
@@ -149,12 +152,14 @@ int main() {
     int moveCount = 0;
     std::vector<Box> boxes;
     std::vector<Target> targets;
+    std::vector<Player> plHistory;
+    std::vector<Box> boxHistory;
 
     changeLevel(pl, 5, 10, lvl, lvl1, tileSize, boxes, targets, moveCount);
 
     while (WindowShouldClose() == false) {
 
-        bool lvlWin = true;
+        bool lvlWin = false;
         int onTarget = 0;
 
         for (Box b : boxes) {
@@ -192,29 +197,31 @@ int main() {
                 }
             }
         } else {
-            controlMechanics(pl, lvl, moveCount, boxes);
+            controlMechanics(pl, lvl, moveCount, boxes, plHistory, boxHistory);
         }
 
         if (IsKeyPressed(KEY_R)) {
             switch (currentLevel) {
                 case 1:
-                    resetLevel(pl, 5, 9, lvl, lvl1, tileSize, boxes, moveCount);
+                    resetLevel(pl, 5, 9, lvl, lvl1, tileSize, boxes, moveCount, boxHistory, plHistory);
                     break;
                 case 2:
-                    resetLevel(pl, 5, 10, lvl, lvl2, tileSize, boxes, moveCount);
+                    resetLevel(pl, 5, 10, lvl, lvl2, tileSize, boxes, moveCount, boxHistory, plHistory);
                     break;
                 case 3:
-                    resetLevel(pl, 7, 10, lvl, lvl3, tileSize, boxes, moveCount);
+                    resetLevel(pl, 7, 10, lvl, lvl3, tileSize, boxes, moveCount, boxHistory, plHistory);
                     break;
                 case 4:
-                    resetLevel(pl, 4, 8, lvl, lvl4, tileSize, boxes, moveCount);
+                    resetLevel(pl, 4, 8, lvl, lvl4, tileSize, boxes, moveCount, boxHistory, plHistory);
                     break;
                 case 5:
-                    resetLevel(pl, 5, 10, lvl, lvl5, tileSize, boxes, moveCount);
+                    resetLevel(pl, 5, 10, lvl, lvl5, tileSize, boxes, moveCount, boxHistory, plHistory);
                     break;
                 default:
                     break;
             }
+        } else if (IsKeyPressed(KEY_Z)) {
+            undoMove(plHistory, pl, boxes, boxHistory, moveCount);
         }
 
         pl.drawX += (pl.posX * tileSize - pl.drawX) / 2;
@@ -276,7 +283,7 @@ int main() {
     return 0;
 }
 
-void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<Box> &boxes) {
+void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<Box> &boxes, std::vector<Player> &plHistory, std::vector<Box> &boxHistory) {
         if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) {
             bool boxFound = false;
             for (Box &b : boxes) {
@@ -290,6 +297,7 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
                         }
                     }
                     if (boxBehind == false && (lvl[pl.posY][pl.posX + 2] == 0 || lvl[pl.posY][pl.posX + 2] == 3)) {
+                        saveMove(plHistory, pl, boxes, boxHistory);
                         pl.posX++;
                         b.posX++;
                         moveCount++;
@@ -298,6 +306,7 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
                 }
             }
             if (boxFound == false && (lvl[pl.posY][pl.posX + 1] == 0 || lvl[pl.posY][pl.posX + 1] == 3)) {
+                saveMove(plHistory, pl, boxes, boxHistory);
                 pl.posX++;
                 moveCount++;
             }
@@ -314,6 +323,7 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
                         }
                     }
                     if (boxBehind == false && (lvl[pl.posY][pl.posX - 2] == 0 || lvl[pl.posY][pl.posX - 2] == 3)) {
+                        saveMove(plHistory, pl, boxes, boxHistory);
                         pl.posX--;
                         b.posX--;
                         moveCount++;
@@ -322,6 +332,7 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
                 }
             }
             if (boxFound == false && (lvl[pl.posY][pl.posX - 1] == 0 || lvl[pl.posY][pl.posX - 1] == 3)) {
+                saveMove(plHistory, pl, boxes, boxHistory);
                 pl.posX--;
                 moveCount++;
             }
@@ -338,6 +349,7 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
                         }
                     }
                     if (boxBehind == false && (lvl[pl.posY + 2][pl.posX] == 0 || lvl[pl.posY + 2][pl.posX] == 3)) {
+                        saveMove(plHistory, pl, boxes, boxHistory);
                         pl.posY++;
                         b.posY++;
                         moveCount++;
@@ -346,6 +358,7 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
                 }
             }
             if (boxFound == false && (lvl[pl.posY + 1][pl.posX] == 0 || lvl[pl.posY + 1][pl.posX] == 3)) {
+                saveMove(plHistory, pl, boxes, boxHistory);
                 pl.posY++;
                 moveCount++;
             }
@@ -362,6 +375,7 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
                         }
                     }
                     if (boxBehind == false && (lvl[pl.posY - 2][pl.posX] == 0 || lvl[pl.posY - 2][pl.posX] == 3)) {
+                        saveMove(plHistory, pl, boxes, boxHistory);
                         pl.posY--;
                         b.posY--;
                         moveCount++;
@@ -370,6 +384,7 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
                 }
             }
             if (boxFound == false && (lvl[pl.posY - 1][pl.posX] == 0 || lvl[pl.posY - 1][pl.posX] == 3)) {
+                saveMove(plHistory, pl, boxes, boxHistory);
                 pl.posY--;
                 moveCount++;
             }
@@ -393,8 +408,9 @@ void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16],
         }
     }
 }
-void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16], int tileSize, std::vector<Box> &boxes, int &moveCount) {
+void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16], int tileSize, std::vector<Box> &boxes, int &moveCount, std::vector<Box> &boxHistory, std::vector<Player> &plHistory) {
     boxes.clear();
+    delHistory(boxHistory, plHistory);
     moveCount = 0;
     for (int i = 0; i < 16; i++) {
         for (int j = 0; j < 16; j++) {
@@ -408,4 +424,27 @@ void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16],
     }
     pl.posX = x;
     pl.posY = y;
+}
+void saveMove(std::vector<Player> &plHistory, Player &pl, std::vector<Box> &boxes, std::vector<Box> &boxHistory) {
+    plHistory.push_back({pl.posX, pl.posY});
+    for (Box &b : boxes) {
+        boxHistory.push_back({b.posX, b.posY});
+    }
+}
+void undoMove(std::vector<Player> &plHistory, Player &pl, std::vector<Box> &boxes, std::vector<Box> &boxHistory, int &moveCount) {
+    if (plHistory.size() > 0) {
+        pl.posX = plHistory[moveCount - 1].posX;
+        pl.posY = plHistory[moveCount - 1].posY;
+        for (int i = (int)boxes.size() - 1; i >= 0; i--) {
+            boxes[i].posX = boxHistory.back().posX;
+            boxes[i].posY = boxHistory.back().posY;
+            boxHistory.pop_back();
+        }
+        plHistory.pop_back();
+        moveCount--;
+    }
+}
+void delHistory(std::vector<Box> &boxHistory, std::vector<Player> &plHistory) {
+    boxHistory.clear();
+    plHistory.clear();
 }
