@@ -115,11 +115,11 @@ void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16],
 void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16], int tileSize, std::vector<Box> &boxes, int &moveCount, std::vector<Box> &boxHistory, std::vector<Player> &plHistory);
 void saveMove(std::vector<Player> &plHistory, Player &pl, std::vector<Box> &boxes, std::vector<Box> &boxHistory);
 void undoMove(std::vector<Player> &plHistory, Player &pl, std::vector<Box> &boxes, std::vector<Box> &boxHistory, int &moveCount);
-void delHistory(std::vector<Box> &boxHistory, std::vector<Player> &plHistory);
 
 int main() {
 
     InitWindow(768, 768, "Sokoban");
+    InitAudioDevice();
     SetTargetFPS(60);
 
     Texture2D brickTex = LoadTexture("images/sprite_bricks.png");
@@ -127,6 +127,8 @@ int main() {
     Texture2D playerTex = LoadTexture("images/sprite_player.png");
     Texture2D boxTex = LoadTexture("images/sprite_box.png");
     Texture2D winTex = LoadTexture("images/sprite_win.png");
+
+    Sound resetSound = LoadSound("sounds/sfx-restart.wav");
 
     int tileSize = brickTex.width;
     Player pl = {5, 9, 5.0f * tileSize, 9.0f * tileSize};
@@ -201,6 +203,7 @@ int main() {
         }
 
         if (IsKeyPressed(KEY_R)) {
+            PlaySound(resetSound);
             switch (currentLevel) {
                 case 1:
                     resetLevel(pl, 5, 9, lvl, lvl1, tileSize, boxes, moveCount, boxHistory, plHistory);
@@ -410,7 +413,8 @@ void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16],
 }
 void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16], int tileSize, std::vector<Box> &boxes, int &moveCount, std::vector<Box> &boxHistory, std::vector<Player> &plHistory) {
     boxes.clear();
-    delHistory(boxHistory, plHistory);
+    boxHistory.clear();
+    plHistory.clear();
     moveCount = 0;
     for (int i = 0; i < 16; i++) {
         for (int j = 0; j < 16; j++) {
@@ -443,8 +447,4 @@ void undoMove(std::vector<Player> &plHistory, Player &pl, std::vector<Box> &boxe
         plHistory.pop_back();
         moveCount--;
     }
-}
-void delHistory(std::vector<Box> &boxHistory, std::vector<Player> &plHistory) {
-    boxHistory.clear();
-    plHistory.clear();
 }
