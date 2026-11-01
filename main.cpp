@@ -110,8 +110,8 @@ struct Target {
     int posY;
 };
 
-void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<Box> &boxes, std::vector<Player> &plHistory, std::vector<Box> &boxHistory);
-void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize, std::vector<Box> &boxes, std::vector<Target> &targets, int &moveCount);
+void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<Box> &boxes, std::vector<Player> &plHistory, std::vector<Box> &boxHistory, Sound walkSound, Sound pushSound);
+void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize, std::vector<Box> &boxes, std::vector<Target> &targets, int &moveCount, std::vector<Box> &boxHistory, std::vector<Player> &plHistory);
 void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16], int tileSize, std::vector<Box> &boxes, int &moveCount, std::vector<Box> &boxHistory, std::vector<Player> &plHistory);
 void saveMove(std::vector<Player> &plHistory, Player &pl, std::vector<Box> &boxes, std::vector<Box> &boxHistory);
 void undoMove(std::vector<Player> &plHistory, Player &pl, std::vector<Box> &boxes, std::vector<Box> &boxHistory, int &moveCount);
@@ -129,6 +129,9 @@ int main() {
     Texture2D winTex = LoadTexture("images/sprite_win.png");
 
     Sound resetSound = LoadSound("sounds/sfx-restart.wav");
+    Sound undoSound = LoadSound("sounds/sfx-undo.wav");
+    Sound walkSound = LoadSound("sounds/sfx-walk.wav");
+    Sound pushSound = LoadSound("sounds/sfx-push.wav");
 
     int tileSize = brickTex.width;
     Player pl = {5, 9, 5.0f * tileSize, 9.0f * tileSize};
@@ -157,7 +160,7 @@ int main() {
     std::vector<Player> plHistory;
     std::vector<Box> boxHistory;
 
-    changeLevel(pl, 5, 10, lvl, lvl1, tileSize, boxes, targets, moveCount);
+    changeLevel(pl, 5, 10, lvl, lvl1, tileSize, boxes, targets, moveCount, boxHistory, plHistory);
 
     while (WindowShouldClose() == false) {
 
@@ -180,30 +183,30 @@ int main() {
 
         if (lvlWin) {
             if (IsKeyPressed(KEY_ENTER)) {
+                PlaySound(resetSound);
                 currentLevel++;
                 switch (currentLevel) {
                     case 2:
-                        changeLevel(pl, 5, 10, lvl, lvl2, tileSize, boxes, targets, moveCount);
+                        changeLevel(pl, 5, 10, lvl, lvl2, tileSize, boxes, targets, moveCount, boxHistory, plHistory);
                         break;
                     case 3:
-                        changeLevel(pl, 7, 10, lvl, lvl3, tileSize, boxes, targets, moveCount);
+                        changeLevel(pl, 7, 10, lvl, lvl3, tileSize, boxes, targets, moveCount, boxHistory, plHistory);
                         break;
                     case 4:
-                        changeLevel(pl, 4, 8, lvl, lvl4, tileSize, boxes, targets, moveCount);
+                        changeLevel(pl, 4, 8, lvl, lvl4, tileSize, boxes, targets, moveCount, boxHistory, plHistory);
                         break;
                     case 5:
-                        changeLevel(pl, 7, 12, lvl, lvl5, tileSize, boxes, targets, moveCount);
+                        changeLevel(pl, 7, 12, lvl, lvl5, tileSize, boxes, targets, moveCount, boxHistory, plHistory);
                         break;
                     default:
                         break;
                 }
             }
         } else {
-            controlMechanics(pl, lvl, moveCount, boxes, plHistory, boxHistory);
+            controlMechanics(pl, lvl, moveCount, boxes, plHistory, boxHistory, walkSound, pushSound);
         }
 
         if (IsKeyPressed(KEY_R)) {
-            PlaySound(resetSound);
             switch (currentLevel) {
                 case 1:
                     resetLevel(pl, 5, 9, lvl, lvl1, tileSize, boxes, moveCount, boxHistory, plHistory);
@@ -224,6 +227,7 @@ int main() {
                     break;
             }
         } else if (IsKeyPressed(KEY_Z)) {
+            PlaySound(undoSound);
             undoMove(plHistory, pl, boxes, boxHistory, moveCount);
         }
 
@@ -286,7 +290,7 @@ int main() {
     return 0;
 }
 
-void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<Box> &boxes, std::vector<Player> &plHistory, std::vector<Box> &boxHistory) {
+void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<Box> &boxes, std::vector<Player> &plHistory, std::vector<Box> &boxHistory, Sound walkSound, Sound pushSound) {
         if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) {
             bool boxFound = false;
             for (Box &b : boxes) {
@@ -300,6 +304,7 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
                         }
                     }
                     if (boxBehind == false && (lvl[pl.posY][pl.posX + 2] == 0 || lvl[pl.posY][pl.posX + 2] == 3)) {
+                        PlaySound(pushSound);
                         saveMove(plHistory, pl, boxes, boxHistory);
                         pl.posX++;
                         b.posX++;
@@ -309,6 +314,7 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
                 }
             }
             if (boxFound == false && (lvl[pl.posY][pl.posX + 1] == 0 || lvl[pl.posY][pl.posX + 1] == 3)) {
+                PlaySound(walkSound);
                 saveMove(plHistory, pl, boxes, boxHistory);
                 pl.posX++;
                 moveCount++;
@@ -326,6 +332,7 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
                         }
                     }
                     if (boxBehind == false && (lvl[pl.posY][pl.posX - 2] == 0 || lvl[pl.posY][pl.posX - 2] == 3)) {
+                        PlaySound(pushSound);
                         saveMove(plHistory, pl, boxes, boxHistory);
                         pl.posX--;
                         b.posX--;
@@ -335,6 +342,7 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
                 }
             }
             if (boxFound == false && (lvl[pl.posY][pl.posX - 1] == 0 || lvl[pl.posY][pl.posX - 1] == 3)) {
+                PlaySound(walkSound);
                 saveMove(plHistory, pl, boxes, boxHistory);
                 pl.posX--;
                 moveCount++;
@@ -352,6 +360,7 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
                         }
                     }
                     if (boxBehind == false && (lvl[pl.posY + 2][pl.posX] == 0 || lvl[pl.posY + 2][pl.posX] == 3)) {
+                        PlaySound(pushSound);
                         saveMove(plHistory, pl, boxes, boxHistory);
                         pl.posY++;
                         b.posY++;
@@ -361,6 +370,7 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
                 }
             }
             if (boxFound == false && (lvl[pl.posY + 1][pl.posX] == 0 || lvl[pl.posY + 1][pl.posX] == 3)) {
+                PlaySound(walkSound);
                 saveMove(plHistory, pl, boxes, boxHistory);
                 pl.posY++;
                 moveCount++;
@@ -378,6 +388,7 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
                         }
                     }
                     if (boxBehind == false && (lvl[pl.posY - 2][pl.posX] == 0 || lvl[pl.posY - 2][pl.posX] == 3)) {
+                        PlaySound(pushSound);
                         saveMove(plHistory, pl, boxes, boxHistory);
                         pl.posY--;
                         b.posY--;
@@ -387,14 +398,17 @@ void controlMechanics(Player &pl, int lvl[16][16], int &moveCount, std::vector<B
                 }
             }
             if (boxFound == false && (lvl[pl.posY - 1][pl.posX] == 0 || lvl[pl.posY - 1][pl.posX] == 3)) {
+                PlaySound(walkSound);
                 saveMove(plHistory, pl, boxes, boxHistory);
                 pl.posY--;
                 moveCount++;
             }
         }
 }
-void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize, std::vector<Box> &boxes, std::vector<Target> &targets, int &moveCount) {
+void changeLevel(Player &pl, int x, int y, int lvl[16][16], int nextLvl[16][16], int tileSize, std::vector<Box> &boxes, std::vector<Target> &targets, int &moveCount, std::vector<Box> &boxHistory, std::vector<Player> &plHistory) {
     boxes.clear();
+    boxHistory.clear();
+    plHistory.clear();
     moveCount = 0;
     pl = {x, y, (x * tileSize), (y * tileSize)};
     for (int i = 0; i < 16; i++) {
@@ -426,8 +440,7 @@ void resetLevel(Player &pl, int x, int y, int lvl[16][16], int resetLvl[16][16],
             }
         }
     }
-    pl.posX = x;
-    pl.posY = y;
+    pl = {x, y, x * tileSize, y * tileSize};
 }
 void saveMove(std::vector<Player> &plHistory, Player &pl, std::vector<Box> &boxes, std::vector<Box> &boxHistory) {
     plHistory.push_back({pl.posX, pl.posY});
