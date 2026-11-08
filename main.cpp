@@ -25,14 +25,14 @@ int lvl2[16][16] = {
     {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
     {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
     {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
-    {5, 5, 5, 5, 5, 5, 5, 5, 5, 1, 1, 1, 1, 5, 5, 5},
-    {5, 5, 5, 5, 5, 1, 1, 1, 1, 1, 0, 0, 1, 5, 5, 5},
-    {5, 5, 5, 5, 1, 1, 0, 2, 0, 2, 0, 0, 1, 5, 5, 5},
-    {5, 5, 5, 5, 1, 0, 0, 3, 0, 1, 0, 0, 1, 5, 5, 5},
-    {5, 5, 5, 5, 1, 3, 0, 0, 1, 1, 0, 1, 1, 5, 5, 5},
-    {5, 5, 5, 5, 1, 0, 1, 3, 1, 1, 0, 0, 1, 5, 5, 5},
-    {5, 5, 5, 5, 1, 0, 0, 0, 2, 0, 0, 0, 1, 5, 5, 5},
-    {5, 5, 5, 5, 1, 1, 0, 0, 1, 0, 0, 1, 1, 5, 5, 5},
+    {5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 1, 1, 4, 5, 5, 5},
+    {5, 5, 5, 5, 5, 4, 1, 1, 1, 1, 0, 0, 4, 5, 5, 5},
+    {5, 5, 5, 5, 4, 1, 0, 2, 0, 2, 0, 0, 4, 5, 5, 5},
+    {5, 5, 5, 5, 4, 0, 0, 3, 0, 7, 0, 0, 4, 5, 5, 5},
+    {5, 5, 5, 5, 4, 3, 0, 0, 7, 8, 0, 1, 4, 5, 5, 5},
+    {5, 5, 5, 5, 4, 0, 7, 3, 8, 8, 0, 0, 4, 5, 5, 5},
+    {5, 5, 5, 5, 4, 0, 0, 0, 2, 0, 0, 0, 4, 5, 5, 5},
+    {5, 5, 5, 5, 1, 4, 0, 0, 4, 0, 0, 4, 1, 5, 5, 5},
     {5, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5},
     {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
     {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5},
@@ -290,6 +290,10 @@ int main() {
                             sheetX = 0 * tileSize;
                             sheetY = 2 * tileSize;
                             break;
+                        case 8:
+                            sheetX = 0 * tileSize;
+                            sheetY = 3 * tileSize;
+                            break;
                     }
                 }
                 Rectangle sourceRec = {
@@ -309,19 +313,20 @@ int main() {
             }
         }
 
-        int plSheetX = pl.animFrame;
-        int plSheetY = pl.dir;
+        bool isMoving = (pl.drawX != (pl.posX * displaySize) || pl.drawY != (pl.posY * displaySize));
+
         float width = pl.flipX ? -(float)16 : (float)16;
         pl.animTimer += GetFrameTime();
-        if (pl.animTimer >= 0.15f) {
+
+        if (pl.animTimer >= 0.20f) {
             pl.animTimer = 0.0f;
             pl.animFrame = (pl.animFrame + 1) % 4;
         }
         Rectangle plSourceRec = {
-            (float) 4 + (plSheetX * 24),
-            (float) 8 + (plSheetY * 24),
+            (float) 4 + (pl.animFrame * 24),
+            (float) 8 + (pl.dir * 24),
             (float)width,
-            (float)16
+            (float)tileSize
         };
         Rectangle plDestRec = {
             pl.drawX,
